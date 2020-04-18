@@ -2,6 +2,7 @@ from typing import Callable, List
 
 
 class VarSystem:
+    #TODO get vars exception
     def __init__(self):
         self.vars = {}
 
@@ -21,8 +22,8 @@ class VarSystem:
     def get_bool_var(self, name: str, res: bool) -> None:
         self.vars.update({name: BOOLEAN(res)})
 
-    def get_func(self, name: str, res: List[str]) -> None:
-        self.vars.update({name: FUNCTION(res)})
+    def get_func(self, name: str, res: List[str], is_func=False) -> None:
+        self.vars.update({name: FUNCTION(res, is_func=is_func)})
 
     def print_var(self) -> List[str]:
         return self.vars.keys()
@@ -31,6 +32,7 @@ class VarSystem:
         try:
             return self.vars.get(name)
         except:
+            #TODO nofound variable exception
             pass
 
 
@@ -73,7 +75,8 @@ class FLOAT:
         return str(self.val)
 
 class FUNCTION:
-    def __init__(self, source: List[str]):
+    def __init__(self, source: List[str], is_func: bool = False):
         self.source = source
+        self.is_func = is_func
     def __str__(self):
         return '\n'.join(self.source)

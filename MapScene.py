@@ -77,7 +77,6 @@ class MapScene:
             ex, ey = event.x, event.y
             ex += 30 - ex % 30 if ex % 30 > 15 else -(ex % 30)
             ey += 30 - ey % 30 if ey % 30 > 15 else -(ey % 30)
-            print(ex, ey)
             self.hero.pos = ex, ey
             self.hero.first_pos = ex, ey
             get_img(self.canv, self.hero.pos)

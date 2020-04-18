@@ -7,7 +7,7 @@ from time import sleep
 
 from typing import Callable, List
 
-from VarSystem import INTEGER
+from VarSystem import FUNCTION
 
 CHARCH = [
     '+',
@@ -30,7 +30,7 @@ class Parser:
             CHARCH.append(i)
         self.hero = hero
 
-    def parse(self, string):
+    def parse(self, string : str, is_function: bool = False):
         counter = 0
         is_if = False
         text = string.split('\n')
@@ -39,8 +39,12 @@ class Parser:
             for j in i.split():
                 if j == 'алг':
                     text[counter:] = self.parsing_algoritms(i, text[counter:])
-                    print(text)
-                    print(self.hero.vars.vars)
+            counter += 1
+
+        counter = 0
+        for i in text:
+            i = self.insert_nl(i)
+            for j in i.split():
                 if j == 'если':
                     self.if_parse(i, string.split('\n')[counter+1:], self.get_spaces(i))
                     is_if = True
@@ -62,6 +66,8 @@ class Parser:
                 elif j == 'ввод':
                     self.parsing_input(i.split('ввод')[-1])
                     break
+                elif j in list(self.hero.vars.print_var()):
+                    self.solving(j)
                 else:
                     self.parsing_comands(i)
             counter += 1
@@ -76,9 +82,16 @@ class Parser:
         from MapScene import walls
         for i in enumerate(list(self.hero.vars.print_var())):
             try:
-                it = re.finditer('[^A-z](' + i[1] + ')[^A-z]', string)
-                for i in it:
-                    string = split_string(string, i.start() + 1, str(self.hero.vars.get_var(''.join(list(i.group())[1:-1]))), i.end() - 1)
+                it = re.finditer('[^A-z](' + i[1] + ')[^A-z]|^'+i[1]+'|$'+i[1], string.replace(' ', ''))
+                for j in it:
+                    print(j.group())
+                    if not isinstance(self.hero.vars.get_var(i[1]), FUNCTION):
+                        string = split_string(string, j.start() + 1, str(self.hero.vars.get_var(''.join(list(j.group())[1:-1]))), j.end() - 1)
+                    else:
+                        example = self.hero.vars.get_var(j.group())
+                        if not example.is_func:
+                            self.parse(str(example))
+                            return 0
             except: pass
         for i in enumerate(list(CHARCH)):
             try:
@@ -161,10 +174,8 @@ class Parser:
         string = re.sub(r'".*"', '', string)
         a = string.split('вывод')[-1]
         a = re.split(r',', a)
-        print(a, [i for i in range(len(a))])
         for j in range(len(a)):
             res += self.solving(a[j])
-            print(a)
             #print(self.solving(j), j)
         self.hero.console.write(res)
 
@@ -181,7 +192,6 @@ class Parser:
                 self.hero.pos = self.hero.controller.move_one_up(self.hero.pos)
             elif j == 'закрасить':
                 self.hero.controller.fill()
-                print('asldf')
             #sleep(0.5)
 
     def parsing_input(self, string):
@@ -276,13 +286,21 @@ class Parser:
 
     def parsing_algoritms(self, string: str, program: List[str]) -> List[str]:
         if not len(re.findall(r'\w', string.replace('алг', ''))): return program
-
+        is_function = False
         name = string.replace('алг', '', 1)
+        if len(re.findall(r'\W\s', name)):
+            #TODO fix tipization
+            name = name.split()[-1]
+            is_function = True
+        try:
+            args = re.findall('\(.*\)', string)[0].split()
+        except: pass
+        #print(args)
         end = 0
         for i in enumerate(program):
             if 'кон' in i[1] and self.get_spaces(i[1]) == 0:
                 end = i[0]
                 break
-        self.hero.vars.get_func(name, program[2:end])
+        self.hero.vars.get_func(name.replace(' ', ''), program[2:end], is_func=is_function)
         del program[:end]
         return program
