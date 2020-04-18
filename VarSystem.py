@@ -22,7 +22,7 @@ class VarSystem:
         self.vars.update({name: BOOLEAN(res)})
 
     def get_func(self, name: str, res: List[str]) -> None:
-        self.vars.update({name: str(FUNCTION(res))})
+        self.vars.update({name: FUNCTION(res)})
 
     def print_var(self) -> List[str]:
         return self.vars.keys()
