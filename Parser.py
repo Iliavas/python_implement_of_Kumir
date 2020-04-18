@@ -130,11 +130,11 @@ class Parser:
             else:
                 st += i
             st += ' '
-        print(st)
         try:
             return str(eval(st))
         except:
-            return st
+            #TODO exception unrecognised expression
+            pass
 
     def parse_equal(self, i):
         res = i.split(':=')[1]
@@ -247,7 +247,7 @@ class Parser:
             for i in range(len(program)):
                 try:
                     del program[0]
-                    if 'кон' in program[0] and self.get_spaces(program[0]) == spaces:
+                    if ('все' in program[0] or 'иначе' in program[0]) and self.get_spaces(program[0]) == spaces:
                         break
                 except: pass
         if boolean == 'True':
@@ -255,7 +255,7 @@ class Parser:
             for i in range(len(program)):
                 if 'иначе' in program[i] and spaces == self.get_spaces(program[i]):
                     min_ = i
-                elif 'кон' in program[i] and spaces == self.get_spaces(program[i]) and min_:
+                elif 'все' in program[i] and spaces == self.get_spaces(program[i]) and min_:
                     max_ = i
             program[min_: max_] = ''
         self.parse('\n'.join(program))
