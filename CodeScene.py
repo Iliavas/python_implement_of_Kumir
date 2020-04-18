@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import *
 from utils import start_th
 
-TEMPLATE = "алг  \nнач \n  \nкц"
+TEMPLATE = "алг  \nнач \n  \nкон"
 
 class CodeScene:
     s = ''

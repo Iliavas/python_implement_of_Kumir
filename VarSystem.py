@@ -21,6 +21,9 @@ class VarSystem:
     def get_bool_var(self, name: str, res: bool) -> None:
         self.vars.update({name: BOOLEAN(res)})
 
+    def get_func(self, name: str, res: List[str]) -> None:
+        self.vars.update({name: str(FUNCTION(res))})
+
     def print_var(self) -> List[str]:
         return self.vars.keys()
 
@@ -68,3 +71,9 @@ class FLOAT:
         self.val = val
     def __str__(self):
         return str(self.val)
+
+class FUNCTION:
+    def __init__(self, source: List[str]):
+        self.source = source
+    def __str__(self):
+        return '\n'.join(self.source)

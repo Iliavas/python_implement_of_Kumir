@@ -37,6 +37,10 @@ class Parser:
         for i in text:
             i = self.insert_nl(i)
             for j in i.split():
+                if j == 'алг':
+                    text[counter:] = self.parsing_algoritms(i, text[counter:])
+                    print(text)
+                    print(self.hero.vars.vars)
                 if j == 'если':
                     self.if_parse(i, string.split('\n')[counter+1:], self.get_spaces(i))
                     is_if = True
@@ -64,13 +68,11 @@ class Parser:
             if is_if: break
 
     def solving(self, string):
-        print(list(string), 'string')
         loc_s = list(string)
         for i in enumerate(loc_s):
             loc_s[i[0]] = i[1].replace(' ', '')
         if '\n' in loc_s:
             return '\n'
-        print(loc_s)
         from MapScene import walls
         for i in enumerate(list(self.hero.vars.print_var())):
             try:
@@ -271,3 +273,16 @@ class Parser:
         for i in range(counter, counter+end):
             del text[i]
         return text
+
+    def parsing_algoritms(self, string: str, program: List[str]) -> List[str]:
+        if not len(re.findall(r'\w', string.replace('алг', ''))): return program
+
+        name = string.replace('алг', '', 1).replace(' ', '')
+        end = 0
+        for i in enumerate(program):
+            if i[1] == 'кон':
+                end = i[0]
+                break
+        self.hero.vars.get_func(name, program[:end])
+        del program[:end]
+        return program
