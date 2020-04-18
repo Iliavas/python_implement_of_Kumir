@@ -293,9 +293,9 @@ class Parser:
             name = name.split()[-1]
             is_function = True
         try:
-            args = re.findall('\(.*\)', string)[0].split()
+            args = re.findall('\(.*\)', string)[0].replace(' ', '').replace('(', '').replace(')', '').split(',')
+            print(args)
         except: pass
-        #print(args)
         end = 0
         for i in enumerate(program):
             if 'кон' in i[1] and self.get_spaces(i[1]) == 0:
