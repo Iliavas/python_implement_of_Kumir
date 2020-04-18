@@ -64,6 +64,13 @@ class Parser:
             if is_if: break
 
     def solving(self, string):
+        print(list(string), 'string')
+        loc_s = list(string)
+        for i in enumerate(loc_s):
+            loc_s[i[0]] = i[1].replace(' ', '')
+        if '\n' in loc_s:
+            return '\n'
+        print(loc_s)
         from MapScene import walls
         for i in enumerate(list(self.hero.vars.print_var())):
             try:
@@ -109,8 +116,6 @@ class Parser:
                     s[i[0]] = str(walls['vertical'])
         string = ' '.join(s)
         st = ''
-        if '\n' in string:
-            return '\n'
         try:
             if string[0] == ' ':
                 st += ' '
@@ -154,9 +159,11 @@ class Parser:
         string = re.sub(r'".*"', '', string)
         a = string.split('вывод')[-1]
         a = re.split(r',', a)
-        for j in a:
-            res += self.solving(j)
-            print(self.solving(j), j)
+        print(a, [i for i in range(len(a))])
+        for j in range(len(a)):
+            res += self.solving(a[j])
+            print(a)
+            #print(self.solving(j), j)
         self.hero.console.write(res)
 
     def parsing_comands(self, string):
