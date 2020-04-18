@@ -277,12 +277,12 @@ class Parser:
     def parsing_algoritms(self, string: str, program: List[str]) -> List[str]:
         if not len(re.findall(r'\w', string.replace('алг', ''))): return program
 
-        name = string.replace('алг', '', 1).replace(' ', '')
+        name = string.replace('алг', '', 1)
         end = 0
         for i in enumerate(program):
-            if i[1] == 'кон':
+            if 'кон' in i[1] and self.get_spaces(i[1]) == 0:
                 end = i[0]
                 break
-        self.hero.vars.get_func(name, program[:end])
+        self.hero.vars.get_func(name, program[2:end])
         del program[:end]
         return program
