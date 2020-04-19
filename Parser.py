@@ -39,6 +39,7 @@ class Parser:
             for j in i.split():
                 if j == 'алг':
                     text[counter:] = self.parsing_algoritms(i, text[counter:])
+                    print(self.hero.vars.vars)
             counter += 1
 
         counter = 0
@@ -84,26 +85,29 @@ class Parser:
         for i in enumerate(list(self.hero.vars.print_var())):
             try:
                 it = re.finditer('[^A-z](' + i[1] + ')[^A-z]|^'+i[1]+'|$'+i[1], string.replace(' ', ''))
-                for j in it:
-                    if not isinstance(self.hero.vars.get_var(i[1]), FUNCTION):
-                        string = split_string(string, j.start() + 1, str(self.hero.vars.get_var(''.join(list(j.group())[1:-1]))), j.end() - 1)
-                    else:
-                        example = self.hero.vars.get_var(j.group())
+            except: continue
+            for j in it:
+                if not isinstance(self.hero.vars.get_var(i[1]), FUNCTION):
+                    string = split_string(string, j.start() + 1, str(self.hero.vars.get_var(''.join(list(j.group())[1:-1]))), j.end() - 1)
+                else:
+                    example = self.hero.vars.get_var(j.group())
+                    print(example.get_args(), 'example', example.source)
+                    try:
+                        args = re.findall(r'\(.+\)', string)[0].replace(' ', '').replace('(', '').replace(')', '').replace(',', ' ').split()
+                    except:
+                        #TODO exception call function without ()
+                        args = []
+                    for i in enumerate(example.args.keys()):
+                        print(i)
                         try:
-                            args = re.findall(r'\(.+\)', string)[0].replace(' ', '').replace('(', '').replace(')', '').split()
-                        except:
-                            #TODO exception call function without ()
-                            args = []
-                        for i in enumerate(example.args.keys()):
-                            try:
-                                example.args[i[1]].append(args[0])
-                            except: pass
-                            #TODO exception low amount of arg's
-
-                        if not example.is_func:
-                            self.parse(str(example))
-                        return 0
-            except: pass
+                            example.args[i[1]].append(args[i[0]])
+                            print('a')
+                        except: print('sosi')
+                        #TODO exception low amount of arg's
+                    print(example.args, list(args))
+                    if not example.is_func:
+                        self.parse(str(example))
+                    return 0
         for i in enumerate(list(CHARCH)):
             try:
                 it = re.finditer('[^A-z](' + i[1] + ')[^A-z]', string)
@@ -298,7 +302,8 @@ class Parser:
     def parsing_algoritms(self, string: str, program: List[str]) -> List[str]:
         if not len(re.findall(r'\w', string.replace('алг', ''))): return program
         is_function = False
-        name = string.replace('алг', '', 1)
+        s = re.sub(r'\(.+\)', '', string)
+        name = s.replace('алг', '', 1)
         if len(re.findall(r'\W\s', name)):
             #TODO fix tipization
             name = name.split()[-1]

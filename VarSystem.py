@@ -84,6 +84,7 @@ class FLOAT:
         return str(self.val)
 
 class FUNCTION:
+    args = {}
     def __init__(self, source: List[str], is_func: bool = False, args: List[str] = False):
         self.source = source
         self.is_func = is_func
@@ -94,7 +95,6 @@ class FUNCTION:
             except: pass
         args = args.replace(',', ' ').split()
         #TODO exception with tipization
-        self.args = {}
         m_type = ''
         m_for_what = 'арг'
         for i in args:
@@ -107,7 +107,10 @@ class FUNCTION:
             #!
             if m_type != '':
                 self.args.update({i: [m_type, m_for_what]})
-        print(self.args)
+        print(self.get_args(), 'init')
+
+    def get_args(self):
+        return self.args
 
     def __str__(self):
         return '\n'.join(self.source)
