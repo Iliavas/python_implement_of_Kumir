@@ -67,6 +67,7 @@ class Parser:
                     self.parsing_input(i.split('ввод')[-1])
                     break
                 elif j in list(self.hero.vars.print_var()):
+                    print(j)
                     self.solving(j)
                 else:
                     self.parsing_comands(i)
@@ -84,14 +85,16 @@ class Parser:
             try:
                 it = re.finditer('[^A-z](' + i[1] + ')[^A-z]|^'+i[1]+'|$'+i[1], string.replace(' ', ''))
                 for j in it:
-                    print(j.group())
                     if not isinstance(self.hero.vars.get_var(i[1]), FUNCTION):
                         string = split_string(string, j.start() + 1, str(self.hero.vars.get_var(''.join(list(j.group())[1:-1]))), j.end() - 1)
                     else:
                         example = self.hero.vars.get_var(j.group())
+                        args = re.findall(r'\(.*\)', string)[0].replace(' ', '').split()
+                        print(args)
                         if not example.is_func:
+                            print(example, 'asfd')
                             self.parse(str(example))
-                            return 0
+                        return 0
             except: pass
         for i in enumerate(list(CHARCH)):
             try:
@@ -294,7 +297,6 @@ class Parser:
             is_function = True
         try:
             args = re.findall('\(.*\)', string)[0].replace(' ', '').replace('(', '').replace(')', '').split(',')
-            print(args)
         except: args = []
         end = 0
         for i in enumerate(program):
