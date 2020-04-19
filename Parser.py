@@ -295,12 +295,12 @@ class Parser:
         try:
             args = re.findall('\(.*\)', string)[0].replace(' ', '').replace('(', '').replace(')', '').split(',')
             print(args)
-        except: pass
+        except: args = []
         end = 0
         for i in enumerate(program):
             if 'кон' in i[1] and self.get_spaces(i[1]) == 0:
                 end = i[0]
                 break
-        self.hero.vars.get_func(name.replace(' ', ''), program[2:end], is_func=is_function)
+        self.hero.vars.get_func(name.replace(' ', ''), program[2:end], is_func=is_function, args=args)
         del program[:end]
         return program

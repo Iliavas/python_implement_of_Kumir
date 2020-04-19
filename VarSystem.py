@@ -1,6 +1,15 @@
 from typing import Callable, List
 
 
+TYPES = [
+
+    'лог',
+    'вещ',
+    'цел',
+
+]
+
+
 class VarSystem:
     #TODO get vars exception
     def __init__(self):
@@ -22,8 +31,8 @@ class VarSystem:
     def get_bool_var(self, name: str, res: bool) -> None:
         self.vars.update({name: BOOLEAN(res)})
 
-    def get_func(self, name: str, res: List[str], is_func=False) -> None:
-        self.vars.update({name: FUNCTION(res, is_func=is_func)})
+    def get_func(self, name: str, res: List[str], is_func=False, args: List[str] = []) -> None:
+        self.vars.update({name: FUNCTION(res, is_func=is_func, args=args)})
 
     def print_var(self) -> List[str]:
         return self.vars.keys()
@@ -75,8 +84,27 @@ class FLOAT:
         return str(self.val)
 
 class FUNCTION:
-    def __init__(self, source: List[str], is_func: bool = False):
+    def __init__(self, source: List[str], is_func: bool = False, args: List[str] = False):
         self.source = source
         self.is_func = is_func
+        args = ','.join(args)
+        for i in TYPES:
+            try:
+                args = args.replace(i, ' ' + i + ' ')
+            except: pass
+        args = args.replace(',', ' ').split()
+        #TODO exception with tipization
+        self.args = {}
+        m_type = ''
+        m_for_what = 'арг'
+        for i in args:
+            if i in TYPES:
+                m_type = i
+                continue
+            #!
+            if m_type != '':
+                self.args.update({i: [m_type, m_for_what]})
+        print(self.args)
+
     def __str__(self):
         return '\n'.join(self.source)
