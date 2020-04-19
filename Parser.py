@@ -94,7 +94,12 @@ class Parser:
                         except:
                             #TODO exception call function without ()
                             args = []
-                        print(args)
+                        for i in enumerate(example.args.keys()):
+                            try:
+                                example.args[i[1]].append(args[0])
+                            except: pass
+                            #TODO exception low amount of arg's
+
                         if not example.is_func:
                             self.parse(str(example))
                         return 0
