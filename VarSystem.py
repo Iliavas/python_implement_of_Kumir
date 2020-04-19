@@ -88,7 +88,7 @@ class FUNCTION:
         self.source = source
         self.is_func = is_func
         args = ','.join(args)
-        for i in TYPES:
+        for i in TYPES + ['арг', 'рез']:
             try:
                 args = args.replace(i, ' ' + i + ' ')
             except: pass
@@ -100,6 +100,9 @@ class FUNCTION:
         for i in args:
             if i in TYPES:
                 m_type = i
+                continue
+            if i in ['арг', 'рез']:
+                m_for_what = i
                 continue
             #!
             if m_type != '':
