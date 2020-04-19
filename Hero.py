@@ -8,7 +8,7 @@ class Hero:
         self.pos = self.first_pos
         self.canv = canv
         self.controller = Controller(self.canv, self)
-        self.Parser = Parser(self)
         self.vars = VarSystem()
+        self.Parser = Parser(self, self.vars)
         self.console = None
         self.img = img

@@ -5,7 +5,7 @@ from math import *
 from tkinter import END
 from time import sleep
 
-from typing import Callable, List
+from typing import Callable, List, Dict
 
 from VarSystem import FUNCTION
 
@@ -25,12 +25,14 @@ to_replace = {
 }
 
 class Parser:
-    def __init__(self, hero):
+    def __init__(self, hero, namespace):
+        self.namespace = namespace
         for i in dir(math):
             CHARCH.append(i)
         self.hero = hero
 
-    def parse(self, string : str, is_function: bool = False):
+    def parse(self, string : str, namespace, is_function: bool = False):
+        self.namespace = namespace
         counter = 0
         is_if = False
         text = string.split('\n')
@@ -39,7 +41,7 @@ class Parser:
             for j in i.split():
                 if j == 'алг':
                     text[counter:] = self.parsing_algoritms(i, text[counter:])
-                    print(self.hero.vars.vars)
+                    print(self.namespace.vars)
             counter += 1
 
         counter = 0
@@ -67,7 +69,7 @@ class Parser:
                 elif j == 'ввод':
                     self.parsing_input(i.split('ввод')[-1])
                     break
-                elif re.sub('\(.+\)', '', j) in list(self.hero.vars.print_var()):
+                elif re.sub('\(.+\)', '', j) in list(namespace.vars.keys()):
                     print(j)
                     self.solving(i)
                 else:
@@ -82,15 +84,16 @@ class Parser:
         if '\n' in loc_s:
             return '\n'
         from MapScene import walls
-        for i in enumerate(list(self.hero.vars.print_var())):
+        for i in enumerate(list(self.namespace.vars.keys())):
             try:
                 it = re.finditer('[^A-z](' + i[1] + ')[^A-z]|^'+i[1]+'|$'+i[1], string.replace(' ', ''))
             except: continue
             for j in it:
-                if not isinstance(self.hero.vars.get_var(i[1]), FUNCTION):
-                    string = split_string(string, j.start() + 1, str(self.hero.vars.get_var(''.join(list(j.group())[1:-1]))), j.end() - 1)
+                if not isinstance(self.namespace.vars[i[1]], FUNCTION):
+                    print(j.start(), j.end())
+                    string = split_string(string, j.start() + 2, str(self.namespace.vars[j.group().replace('(', '').replace(')', '')]), j.end())
                 else:
-                    example = self.hero.vars.get_var(j.group())
+                    example = self.example[j.group()]
                     print(example.get_args(), 'example', example.source)
                     try:
                         args = re.findall(r'\(.+\)', string)[0].replace(' ', '').replace('(', '').replace(')', '').replace(',', ' ').split()
@@ -111,8 +114,9 @@ class Parser:
         for i in enumerate(list(CHARCH)):
             try:
                 it = re.finditer('[^A-z](' + i[1] + ')[^A-z]', string)
-                for i in it:
-                    string = split_string(string, i.start() + 1, i.group()[1:-1], i.end() - 1)
+                for j in it:
+                    print(j.start(), j.end())
+                    string = split_string(string, j.start(), j.group(), j.end())
             except: pass
         s = string.split()
         f = False
@@ -150,14 +154,17 @@ class Parser:
             if string[0] == ' ':
                 st += ' '
         except: pass
+        print(st, string.split())
         for i in string.split():
-            if i in list(self.hero.vars.print_var()):
-                st += str(self.hero.vars.get_var(i))
+            if i in list(self.namespace.vars.keys()):
+                st += str(self.namespace.vars[i])
+                print(list(st))
             elif i in list(to_replace.keys()):
                 st += to_replace.get(i)
             else:
                 st += i
             st += ' '
+        print(st)
         try:
             return str(eval(st))
         except:
@@ -171,7 +178,7 @@ class Parser:
                 res = self.solving(i.split(':=')[1])
                 break
         try:
-            self.hero.vars.vars[i.split(':=')[0].replace(' ', '')] = res
+            self.namespace.vars[i.split(':=')[0].replace(' ', '')] = res
         except: pass
 
     def printing(self, string):
@@ -189,7 +196,10 @@ class Parser:
         string = re.sub(r'".*"', '', string)
         a = string.split('вывод')[-1]
         a = re.split(r',', a)
+        #print(a)
         for j in range(len(a)):
+            print(self.solving(a[j]))
+            #print(a[j])
             res += self.solving(a[j])
             #print(self.solving(j), j)
         self.hero.console.write(res)
@@ -227,8 +237,8 @@ class Parser:
         if f: return 0
         self.hero.console.curr_val = string
         self.hero.console.pre_string = self.hero.console.get_string()
-        self.hero.vars.set_var(string[-1], 'Non-Recognised')
-        while self.hero.vars.get_var(string[-1]) == 'Non-Recognised':
+        self.namespace.get_int_var(string[-1], -9999)
+        while self.namespace.get_var(string[-1]) == -9999:
             sleep(1)
 
     def insert_nl(self, string: str):
@@ -250,7 +260,7 @@ class Parser:
                 name, res = i.split(':=')
             except:
                 name, res, = i, ''
-            self.hero.vars.get_int_var(name, res)
+            self.namespace.get_int_var(name, res)
             print(self.hero.vars.print_var())
     @get_var
     def get_bool_var(self, string: str, l: List[str] = []):
@@ -259,7 +269,7 @@ class Parser:
                 name, res = i.split(':=')
             except:
                 name, res = i, ''
-            self.hero.vars.get_bool_var(name, res)
+            self.namespace.get_bool_var(name, res)
 
     def get_spaces(self, string: str):
         return len(re.split('\S', string)[0])
@@ -316,6 +326,6 @@ class Parser:
             if 'кон' in i[1] and self.get_spaces(i[1]) == 0:
                 end = i[0]
                 break
-        self.hero.vars.get_func(name.replace(' ', ''), program[2:end], is_func=is_function, args=args)
+        self.namespace.get_func(name.replace(' ', ''), program[2:end], is_func=is_function, args=args)
         del program[:end]
         return program

@@ -27,4 +27,4 @@ class CodeScene:
         get_img(self.hero.canv, pos=self.hero.first_pos)
         self.hero.pos = self.hero.first_pos
         self.s = self.txt.get("1.0", END)
-        self.hero.Parser.parse(self.s)
+        self.hero.Parser.parse(self.s, self.hero.vars)
