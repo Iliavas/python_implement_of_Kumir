@@ -66,9 +66,9 @@ class Parser:
                 elif j == 'ввод':
                     self.parsing_input(i.split('ввод')[-1])
                     break
-                elif j in list(self.hero.vars.print_var()):
+                elif re.sub('\(.+\)', '', j) in list(self.hero.vars.print_var()):
                     print(j)
-                    self.solving(j)
+                    self.solving(i)
                 else:
                     self.parsing_comands(i)
             counter += 1
@@ -89,10 +89,13 @@ class Parser:
                         string = split_string(string, j.start() + 1, str(self.hero.vars.get_var(''.join(list(j.group())[1:-1]))), j.end() - 1)
                     else:
                         example = self.hero.vars.get_var(j.group())
-                        args = re.findall(r'\(.*\)', string)[0].replace(' ', '').split()
+                        try:
+                            args = re.findall(r'\(.+\)', string)[0].replace(' ', '').replace('(', '').replace(')', '').split()
+                        except:
+                            #TODO exception call function without ()
+                            args = []
                         print(args)
                         if not example.is_func:
-                            print(example, 'asfd')
                             self.parse(str(example))
                         return 0
             except: pass
