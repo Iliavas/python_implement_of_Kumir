@@ -86,12 +86,12 @@ class Parser:
         from MapScene import walls
         for i in enumerate(list(self.namespace.vars.keys())):
             try:
-                it = re.finditer('[^A-z](' + i[1] + ')[^A-z]|^'+i[1]+'|$'+i[1], string.replace(' ', ''))
+                it = re.finditer('[^A-z](' + i[1] + ')[^A-z]|^'+i[1]+'|$'+i[1], string)
             except: continue
             for j in it:
                 if not isinstance(self.namespace.vars[i[1]], FUNCTION):
                     print(j.start(), j.end())
-                    string = split_string(string, j.start() + 2, str(self.namespace.vars[j.group().replace('(', '').replace(')', '')]), j.end())
+                    string = split_string(string, j.start() + 1, str(self.namespace.vars[j.group().replace('(', '').replace(')', '')]), j.end() - 1)
                 else:
                     example = self.example[j.group()]
                     print(example.get_args(), 'example', example.source)
