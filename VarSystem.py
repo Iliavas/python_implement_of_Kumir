@@ -5,7 +5,7 @@ TYPES = [
 
     'лог',
     'вещ',
-    'цел',
+    'цел'
 
 ]
 
@@ -31,8 +31,8 @@ class VarSystem:
     def get_bool_var(self, name: str, res: bool) -> None:
         self.vars.update({name: BOOLEAN(res)})
 
-    def get_func(self, name: str, res: List[str], is_func=False, args: List[str] = []) -> None:
-        self.vars.update({name: FUNCTION(res, is_func=is_func, args=args)})
+    def get_func(self, name: str, res: List[str], is_func=False, args: List[str] = [], type: str = None) -> None:
+        self.vars.update({name: FUNCTION(res, is_func=is_func, args=args, type=type)})
 
     def print_var(self) -> List[str]:
         return self.vars.keys()
@@ -85,7 +85,7 @@ class FLOAT:
 
 class FUNCTION:
     args = {}
-    def __init__(self, source: List[str], is_func: bool = False, args: List[str] = False):
+    def __init__(self, source: List[str], is_func: bool = False, args: List[str] = [], type: str = None):
         self.source = source
         self.is_func = is_func
         args = ','.join(args)
@@ -114,6 +114,14 @@ class FUNCTION:
                 self.namespace.get_int_var(i, '-9999')
             elif self.args[i][0] == 'лог':
                 self.namespace.get_bool_var(i, 'False')
+        if is_func:
+            if 'цел' in type:
+                self.namespace.get_int_var('знач', '-9999')
+                self.args.update({'знач': ['цел', 'рез']})
+            elif 'лог' in type:
+                self.namespace.get_bool_var('знач', 'False')
+                self.args.update({'знач': ['лог', 'рез']})
+
 
     def reinit(self):
         for i in self.args.keys():

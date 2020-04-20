@@ -1,6 +1,6 @@
 import math
 import re
-from utils import split_string
+from utils import split_string, get_quoters_under_func
 from math import *
 from tkinter import END
 from time import sleep
@@ -42,11 +42,10 @@ class Parser:
                 if j == 'алг':
                     text[counter:] = self.parsing_algoritms(i, text[counter:])
             counter += 1
-
+        word_counter = 0
         counter = 0
         for i in text:
             i = self.insert_nl(i)
-            print(list(i))
             for j in i.split():
                 if j == 'если':
                     self.if_parse(i, string.split('\n')[counter+1:], self.get_spaces(i))
@@ -69,18 +68,24 @@ class Parser:
                 elif j == 'ввод':
                     self.parsing_input(i.split('ввод')[-1])
                     break
-                elif re.sub('\(.+\)', '', j) in list(namespace.vars.keys()):
-                    self.solving(i)
+                elif re.sub('\(.*\)', '', j) in list(namespace.vars.keys()):
+                    print(i.split(), j, i[word_counter:], word_counter)
+                    self.solving(' '.join(i.split()[word_counter:]))
                 else:
                     self.parsing_comands(i)
+                word_counter += 1
             counter += 1
+            word_counter = 0
             if is_if: break
         if is_function:
             to_ret = {}
             for i in args.keys():
                 if args[i][1] == 'рез':
-                    to_ret.update({args[i][2]: self.namespace.vars[i]})
-            print(to_ret)
+                    if i != 'знач':
+                        to_ret.update({args[i][2]: self.namespace.vars[i]})
+                    else:
+                        print(self.namespace.vars[i], 'знач')
+                        return self.namespace.vars[i]
             return to_ret
 
     def solving(self, string):
@@ -110,11 +115,15 @@ class Parser:
                         except: print('sosi')
                         #TODO exception low amount of arg's
                     example.reinit()
+                    ret = self.parse(str(example), example.namespace, is_function=True, args=example.args)
                     if not example.is_func:
-                        ret = self.parse(str(example), example.namespace, is_function=True, args=example.args)
                         for k in ret.keys():
                             self.namespace.vars[k] = ret[k]
                         return 0
+                    try:
+                        end = re.search(r'\)', string).end()
+                        string = split_string(string, j.start(), ret, end)
+                    except: print(string)
         for i in enumerate(list(CHARCH)):
             try:
                 it = re.finditer('[^A-z](' + i[1] + ')[^A-z]', string)
@@ -172,17 +181,18 @@ class Parser:
             pass
 
     def parse_equal(self, i):
-        res = i.split(':=')[1]
+        #res = self.parse(i.split(':=')[1], self.namespace)
         for j in i.split(':=')[1].split(' '):
-            if j in CHARCH:
+            print(j)
+            if j in CHARCH or j in list(self.namespace.vars.keys()):
                 res = self.solving(i.split(':=')[1])
                 break
         try:
             self.namespace.vars[i.split(':=')[0].replace(' ', '')] = res
-        except: pass
+        except: print('sosat')
+        print(self.namespace.vars)
 
     def printing(self, string):
-        print(4)
         res = ''
         q = []
         c = 0
@@ -196,11 +206,10 @@ class Parser:
             c += 1
         string = re.sub(r'".*"', '', string)
         a = string.split('вывод')[-1]
-        a = re.split(r',', a)
+        a = get_quoters_under_func(a)
+
         for j in range(len(a)):
-            #print(a[j])
             res += self.solving(a[j])
-            #print(self.solving(j), j)
         self.hero.console.write(res)
 
     def parsing_comands(self, string):
@@ -246,7 +255,7 @@ class Parser:
     def get_var(func: Callable) -> Callable:
         def wrapper(self, string: str, l: List[str] = []):
             a = re.sub(' ', '', string)
-            a = a.split(',')
+            a = get_quoters_under_func(a)
             func(self, string, l=a)
         return wrapper
 
@@ -255,6 +264,8 @@ class Parser:
         for i in l:
             try:
                 name, res = i.split(':=')
+                res = self.solving(res)
+                print(res)
             except:
                 name, res, = i, ''
             self.namespace.get_int_var(name, res)
@@ -310,9 +321,13 @@ class Parser:
         is_function = False
         s = re.sub(r'\(.+\)', '', string)
         name = s.replace('алг', '', 1)
-        if len(re.findall(r'\W\s', name)):
+        t = None
+        if len(name.split()) > 1:
+            print(name.split())
             #TODO fix tipization
+            t = name.split()[0]
             name = name.split()[-1]
+
             is_function = True
         try:
             args = re.findall('\(.*\)', string)[0].replace(' ', '').replace('(', '').replace(')', '').split(',')
@@ -322,6 +337,7 @@ class Parser:
             if 'кон' in i[1] and self.get_spaces(i[1]) == 0:
                 end = i[0]
                 break
-        self.namespace.get_func(name.replace(' ', ''), program[2:end], is_func=is_function, args=args)
+        print(is_function)
+        self.namespace.get_func(name.replace(' ', ''), program[2:end], is_func=is_function, args=args, type=t)
         del program[:end]
         return program
