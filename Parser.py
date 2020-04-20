@@ -31,7 +31,7 @@ class Parser:
             CHARCH.append(i)
         self.hero = hero
 
-    def parse(self, string : str, namespace, is_function: bool = False):
+    def parse(self, string : str, namespace, is_function: bool = False, args: Dict = {}):
         self.namespace = namespace
         counter = 0
         is_if = False
@@ -41,12 +41,12 @@ class Parser:
             for j in i.split():
                 if j == 'алг':
                     text[counter:] = self.parsing_algoritms(i, text[counter:])
-                    print(self.namespace.vars)
             counter += 1
 
         counter = 0
         for i in text:
             i = self.insert_nl(i)
+            print(list(i))
             for j in i.split():
                 if j == 'если':
                     self.if_parse(i, string.split('\n')[counter+1:], self.get_spaces(i))
@@ -70,12 +70,18 @@ class Parser:
                     self.parsing_input(i.split('ввод')[-1])
                     break
                 elif re.sub('\(.+\)', '', j) in list(namespace.vars.keys()):
-                    print(j)
                     self.solving(i)
                 else:
                     self.parsing_comands(i)
             counter += 1
             if is_if: break
+        if is_function:
+            to_ret = {}
+            for i in args.keys():
+                if args[i][1] == 'рез':
+                    to_ret.update({args[i][2]: self.namespace.vars[i]})
+            print(to_ret)
+            return to_ret
 
     def solving(self, string):
         loc_s = list(string)
@@ -90,33 +96,29 @@ class Parser:
             except: continue
             for j in it:
                 if not isinstance(self.namespace.vars[i[1]], FUNCTION):
-                    print(j.start(), j.end())
-                    string = split_string(string, j.start() + 1, str(self.namespace.vars[j.group().replace('(', '').replace(')', '')]), j.end() - 1)
+                    string = split_string(string, j.start() + 1, str(self.namespace.vars[j.group().replace(' ', '').replace('(', '').replace(')', '')]), j.end() - 1)
                 else:
                     example = self.namespace.vars[j.group().replace(' ', '')]
-                    print(example.get_args(), 'example', example.source)
                     try:
                         args = re.findall(r'\(.+\)', string)[0].replace(' ', '').replace('(', '').replace(')', '').replace(',', ' ').split()
                     except:
                         #TODO exception call function without ()
                         args = []
                     for i in enumerate(example.args.keys()):
-                        print(i)
                         try:
                             example.args[i[1]].append(args[i[0]])
-                            print('a')
                         except: print('sosi')
                         #TODO exception low amount of arg's
-                    print(example.args, list(args))
                     example.reinit()
-                    #if not example.is_func:
-                    self.parse(str(example), example.namespace)
-                    return 0
+                    if not example.is_func:
+                        ret = self.parse(str(example), example.namespace, is_function=True, args=example.args)
+                        for k in ret.keys():
+                            self.namespace.vars[k] = ret[k]
+                        return 0
         for i in enumerate(list(CHARCH)):
             try:
                 it = re.finditer('[^A-z](' + i[1] + ')[^A-z]', string)
                 for j in it:
-                    print(j.start(), j.end())
                     string = split_string(string, j.start(), j.group(), j.end())
             except: pass
         s = string.split()
@@ -155,17 +157,14 @@ class Parser:
             if string[0] == ' ':
                 st += ' '
         except: pass
-        print(st, string.split())
         for i in string.split():
             if i in list(self.namespace.vars.keys()):
                 st += str(self.namespace.vars[i])
-                print(list(st))
             elif i in list(to_replace.keys()):
                 st += to_replace.get(i)
             else:
                 st += i
             st += ' '
-        print(st)
         try:
             return str(eval(st))
         except:
@@ -183,6 +182,7 @@ class Parser:
         except: pass
 
     def printing(self, string):
+        print(4)
         res = ''
         q = []
         c = 0
@@ -197,9 +197,7 @@ class Parser:
         string = re.sub(r'".*"', '', string)
         a = string.split('вывод')[-1]
         a = re.split(r',', a)
-        #print(a)
         for j in range(len(a)):
-            print(self.solving(a[j]))
             #print(a[j])
             res += self.solving(a[j])
             #print(self.solving(j), j)
@@ -209,7 +207,6 @@ class Parser:
         for j in string.split(' '):
             if j == 'вправо':
                 self.hero.pos = self.hero.controller.move_one_forward(self.hero.pos)
-                print(self.hero.pos)
             elif j == 'вниз':
                 self.hero.pos = self.hero.controller.move_one_down(self.hero.pos)
             elif j == 'влево':
@@ -248,7 +245,6 @@ class Parser:
 
     def get_var(func: Callable) -> Callable:
         def wrapper(self, string: str, l: List[str] = []):
-            print(string)
             a = re.sub(' ', '', string)
             a = a.split(',')
             func(self, string, l=a)
@@ -262,7 +258,6 @@ class Parser:
             except:
                 name, res, = i, ''
             self.namespace.get_int_var(name, res)
-            print(self.hero.vars.print_var())
     @get_var
     def get_bool_var(self, string: str, l: List[str] = []):
         for i in l:
