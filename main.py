@@ -9,5 +9,6 @@ def main():
     app = MapScene(root)
     root.mainloop()
 
+
 if __name__ == '__main__':
     main()

@@ -112,11 +112,17 @@ class FUNCTION:
         #TODO get types of vars
         for i in self.args.keys():
             if self.args[i][0] == 'цел':
-                self.namespace.get_int_var(i, -9999)
+                self.namespace.get_int_var(i, '-9999')
             elif self.args[i][0] == 'лог':
-                self.namespace.get_bool_var(i, False)
+                self.namespace.get_bool_var(i, 'False')
+        print(self.namespace.vars)
 
-
+    def reinit(self):
+        for i in self.args.keys():
+            if self.args[i][0] == 'цел':
+                self.namespace.get_int_var(i, self.args[i][2])
+            elif self.args[i][0] == 'лог':
+                self.namespace.get_bool_var(i, self.args[i][2])
     def get_args(self):
         return self.args
 

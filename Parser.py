@@ -108,6 +108,7 @@ class Parser:
                         except: print('sosi')
                         #TODO exception low amount of arg's
                     print(example.args, list(args))
+                    example.reinit()
                     #if not example.is_func:
                     self.parse(str(example), example.namespace)
                     return 0
