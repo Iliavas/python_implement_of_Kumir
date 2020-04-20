@@ -93,7 +93,7 @@ class Parser:
                     print(j.start(), j.end())
                     string = split_string(string, j.start() + 1, str(self.namespace.vars[j.group().replace('(', '').replace(')', '')]), j.end() - 1)
                 else:
-                    example = self.example[j.group()]
+                    example = self.namespace.vars[j.group().replace(' ', '')]
                     print(example.get_args(), 'example', example.source)
                     try:
                         args = re.findall(r'\(.+\)', string)[0].replace(' ', '').replace('(', '').replace(')', '').replace(',', ' ').split()
@@ -108,8 +108,8 @@ class Parser:
                         except: print('sosi')
                         #TODO exception low amount of arg's
                     print(example.args, list(args))
-                    if not example.is_func:
-                        self.parse(str(example))
+                    #if not example.is_func:
+                    self.parse(str(example), example.namespace)
                     return 0
         for i in enumerate(list(CHARCH)):
             try:

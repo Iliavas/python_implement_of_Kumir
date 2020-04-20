@@ -108,6 +108,14 @@ class FUNCTION:
             if m_type != '':
                 self.args.update({i: [m_type, m_for_what]})
         print(self.get_args(), 'init')
+        self.namespace = VarSystem()
+        #TODO get types of vars
+        for i in self.args.keys():
+            if self.args[i][0] == 'цел':
+                self.namespace.get_int_var(i, -9999)
+            elif self.args[i][0] == 'лог':
+                self.namespace.get_bool_var(i, False)
+
 
     def get_args(self):
         return self.args
