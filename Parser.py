@@ -7,8 +7,8 @@ from time import sleep
 
 from typing import Callable, List, Dict
 
-from VarSystem import FUNCTION
-
+from VarSystem import FUNCTION, INTEGER
+from VarSystem import VarSystem
 CHARCH = [
     '+',
     '-',
@@ -24,7 +24,10 @@ to_replace = {
 
 }
 
+MASTER_NAMESPACE = VarSystem()
+
 class Parser:
+    nss = []
     def __init__(self, hero, namespace):
         self.namespace = namespace
         for i in dir(math):
@@ -32,6 +35,8 @@ class Parser:
         self.hero = hero
 
     def parse(self, string : str, namespace, is_function: bool = False, args: Dict = {}):
+        self.nss.append(namespace)
+        print('start {}'.format(self.namespace.vars))
         self.namespace = namespace
         counter = 0
         is_if = False
@@ -43,7 +48,10 @@ class Parser:
                     text[counter:] = self.parsing_algoritms(i, text[counter:])
             counter += 1
         word_counter = 0
+        for i in MASTER_NAMESPACE.vars.keys():
+            self.namespace.vars.update({i : MASTER_NAMESPACE.vars[i]})
         counter = 0
+        print(self.namespace.vars)
         for i in text:
             i = self.insert_nl(i)
             for j in i.split():
@@ -73,9 +81,10 @@ class Parser:
                 else:
                     self.parsing_comands(i)
                 word_counter += 1
+                if is_if: break
             counter += 1
             word_counter = 0
-            if is_if: break
+        print('end {}'.format(self.namespace.vars))
         if is_function:
             to_ret = {}
             for i in args.keys():
@@ -83,9 +92,17 @@ class Parser:
                     if i != 'знач':
                         to_ret.update({args[i][2]: self.namespace.vars[i]})
                     else:
-                        print('self.namespace', self.namespace.vars, self.namespace.vars['знач'])
-                        return self.namespace.vars['знач']
+                        print(self.namespace.vars)
+                        to_return = self.namespace.vars['знач']
+                        self.namespace = self.nss[-2]
+                        del self.nss[-1]
+                        return to_return
+            self.namespace = self.nss[-2]
+            del self.nss[-1]
             return to_ret
+        self.namespace = self.nss[-2]
+        del self.nss[-1]
+        return 0
 
     def solving(self, string):
         loc_s = list(string)
@@ -99,7 +116,6 @@ class Parser:
                 it = re.finditer('[^A-z](' + i[1] + ')[^A-z]|^'+i[1]+'|$'+i[1], string)
             except: continue
             for j in it:
-                print(i[1])
                 if not isinstance(self.namespace.vars[i[1]], FUNCTION):
                     string = split_string(string, j.start() + 1, str(self.namespace.vars[j.group().replace(' ', '').replace('(', '').replace(')', '')]), j.end() - 1)
                 else:
@@ -117,12 +133,15 @@ class Parser:
                     example.reinit()
                     ret = self.parse(str(example), example.namespace, is_function=True, args=example.args)
                     if not example.is_func:
-                        for k in ret.keys():
-                            self.namespace.vars[k] = ret[k]
+                        if isinstance(ret, dict):
+                            for k in ret.keys():
+                                self.namespace.vars[k] = ret[k]
                         return 0
-                    try:
+                    else:
                         end = re.search(r'\)', string).end()
-                        string = split_string(string, j.start(), ret, end)
+                        string = split_string(string, j.start(), str(ret), end)
+                    try:
+                        pass
                     except: print(string)
         for i in enumerate(list(CHARCH)):
             try:
@@ -207,10 +226,10 @@ class Parser:
         a = get_quoters_under_func(a)
 
         for j in range(len(a)):
-            res += self.solving(a[j])
+            res += str(self.solving(a[j]))
         self.hero.console.write(res)
 
-    def parsing_comands(self, string):
+    def  parsing_comands(self, string):
         for j in string.split(' '):
             if j == 'вправо':
                 self.hero.pos = self.hero.controller.move_one_forward(self.hero.pos)
@@ -333,6 +352,6 @@ class Parser:
             if 'кон' in i[1] and self.get_spaces(i[1]) == 0:
                 end = i[0]
                 break
-        self.namespace.get_func(name.replace(' ', ''), program[2:end], is_func=is_function, args=args, type=t)
+        MASTER_NAMESPACE.get_func(name.replace(' ', ''), program[2:end], is_func=is_function, args=args, type=t)
         del program[:end]
         return program

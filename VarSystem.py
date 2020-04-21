@@ -86,6 +86,8 @@ class FLOAT:
 class FUNCTION:
     args = {}
     def __init__(self, source: List[str], is_func: bool = False, args: List[str] = [], type: str = None):
+        self.args = {}
+        print(args, 'args in parent')
         self.source = source
         self.is_func = is_func
         args = ','.join(args)
@@ -94,6 +96,12 @@ class FUNCTION:
                 args = args.replace(i, ' ' + i + ' ')
             except: pass
         args = args.replace(',', ' ').split()
+        if not is_func:
+            try:
+                for i in range(len(args)):
+                    if args[i] == 'знач':
+                        del args[i]
+            except: pass
         #TODO exception with tipization
         m_type = ''
         m_for_what = 'арг'
@@ -121,6 +129,7 @@ class FUNCTION:
             elif 'лог' in type:
                 self.namespace.get_bool_var('знач', 'False')
                 self.args.update({'знач': ['лог', 'рез']})
+        print(self.namespace.vars)
 
 
     def reinit(self):

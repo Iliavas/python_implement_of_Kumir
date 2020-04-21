@@ -4,7 +4,6 @@ from MapScene import MapScene
 
 
 def main():
-
     root = tk.Tk()
     app = MapScene(root)
     root.mainloop()
