@@ -4,13 +4,14 @@ import tkinter as tk
 from tkinter import *
 from utils import start_th
 TEMPLATE = "алг  \nнач \n  \nкон"
+#from debug import TEMP
 
 class CodeScene:
     s = ''
     def __init__(self, master, hero):
         self.master = master
         self.frame = tk.Frame(self.master)
-        self.txt = scrolledtext.ScrolledText(master, width=30, height=30)
+        self.txt = scrolledtext.ScrolledText(master, width=50, height=30)
         self.quitButton = tk.Button(self.frame, text = 'Quit', width = 25, command = self.close_windows)
         self.do_button = tk.Button(self.frame, text='run code', width = 10, command=lambda : start_th(self.get_text, ()))
         self.quitButton.pack()
@@ -27,3 +28,4 @@ class CodeScene:
         self.hero.pos = self.hero.first_pos
         self.s = self.txt.get("1.0", END)
         self.hero.Parser.parse(self.s, self.hero.vars)
+         #self.hero.Parser.parse('\n'.join(TEMP), self.hero.vars)
