@@ -29,7 +29,19 @@ class VarSystem:
 
     @set_var
     def get_bool_var(self, name: str, res: bool) -> None:
-        self.vars.update({name: BOOLEAN(res)})
+        self.vars.update({name: BOOLEAN(True if res == 'True' else False)})
+
+    @set_var
+    def get_char_var(self, name: str, res: str) -> None:
+        self.vars.update({name: CHAR(res)})
+        print(str(self.vars[name]), 'vars')
+
+    def get_string_var(self, name: str, res: str) -> None:
+        self.vars.update({name: STRING(res)})
+
+    @set_var
+    def get_float_var(self, name: str, res: float) -> None:
+        self.vars.update({name: FLOAT(float(res))})
 
     def get_func(self, name: str, res: List[str], is_func=False, args: List[str] = [], type: str = None) -> None:
         self.vars.update({name: FUNCTION(res, is_func=is_func, args=args, type=type)})
@@ -122,6 +134,12 @@ class FUNCTION:
                 self.namespace.get_int_var(i, '-9999')
             elif self.args[i][0] == 'лог':
                 self.namespace.get_bool_var(i, 'False')
+            elif self.args[i][0] == 'сим':
+                self.namespace.get_char_var(i, 'z')
+            elif self.args[i][0] == 'лит':
+                self.namespace.get_string_var(i, 'z')
+            elif self.args[i][0] == 'вещ':
+                self.namespace.get_float_var(i, '-1.4')
         if is_func:
             if 'цел' in type:
                 self.namespace.get_int_var('знач', '-9999')
@@ -129,6 +147,15 @@ class FUNCTION:
             elif 'лог' in type:
                 self.namespace.get_bool_var('знач', 'False')
                 self.args.update({'знач': ['лог', 'рез']})
+            elif 'сим' in type:
+                self.namespace.get_char_var('знач', 'z')
+                self.args.update({'знач': ['сим', 'рез']})
+            elif 'лит' in type:
+                self.namespace.get_string_var('знач', 'z')
+                self.args.update({'знач': ['лит', 'рез']})
+            elif 'вещ' in type:
+                self.namespace.get_float_var('знач', '-1.4')
+                self.args.update({'знач': ['вещ', 'рез']})
         print(self.namespace.vars)
 
 
@@ -138,6 +165,12 @@ class FUNCTION:
                 self.namespace.get_int_var(i, self.args[i][-1])
             elif self.args[i][0] == 'лог':
                 self.namespace.get_bool_var(i, self.args[i][-1])
+            elif self.args[i][0] == 'сим':
+                self.namespace.get_char_var(i, self.args[i][-1])
+            elif self.args[i][0] == 'лит':
+                self.namespace.get_string_var(i, self.args[i][-1])
+            elif self.args[i][0] == 'вещ':
+                self.namespace.get_float_var(i, self.args[i][-1])
     def get_args(self):
         return self.args
 

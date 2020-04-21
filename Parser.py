@@ -7,7 +7,7 @@ from time import sleep
 
 from typing import Callable, List, Dict
 
-from VarSystem import FUNCTION, INTEGER
+from VarSystem import FUNCTION, INTEGER, STRING, CHAR
 from VarSystem import VarSystem
 CHARCH = [
     '+',
@@ -51,7 +51,6 @@ class Parser:
         for i in MASTER_NAMESPACE.vars.keys():
             self.namespace.vars.update({i : MASTER_NAMESPACE.vars[i]})
         counter = 0
-        print(self.namespace.vars)
         for i in text:
             i = self.insert_nl(i)
             for j in i.split():
@@ -72,6 +71,15 @@ class Parser:
                     break
                 elif j == 'лог':
                     self.get_bool_var(i.replace('лог', ''))
+                    break
+                elif j == 'вещ':
+                    self.get_float_var(i.replace('вещ', ''))
+                    break
+                elif j == 'сим':
+                    self.get_char_var(i.replace('сим', ''))
+                    break
+                elif j == 'лит':
+                    self.get_string_var(i.replace('лит', ''))
                     break
                 elif j == 'ввод':
                     self.parsing_input(i.split('ввод')[-1])
@@ -100,7 +108,10 @@ class Parser:
             self.namespace = self.nss[-2]
             del self.nss[-1]
             return to_ret
-        self.namespace = self.nss[-2]
+        try:
+            self.namespace = self.nss[-2]
+        except: pass
+
         del self.nss[-1]
         return 0
 
@@ -112,12 +123,16 @@ class Parser:
             return '\n'
         from MapScene import walls
         for i in enumerate(list(self.namespace.vars.keys())):
+            print(i, 'i')
             try:
                 it = re.finditer('[^A-z](' + i[1] + ')[^A-z]|^'+i[1]+'|$'+i[1], string)
             except: continue
             for j in it:
                 if not isinstance(self.namespace.vars[i[1]], FUNCTION):
-                    string = split_string(string, j.start() + 1, str(self.namespace.vars[j.group().replace(' ', '').replace('(', '').replace(')', '')]), j.end() - 1)
+                    string = split_string(string, j.start(), str(self.namespace.vars[j.group().replace(' ', '').replace('(', '').replace(')', '')].val), j.end())
+                    if isinstance(self.namespace.vars[i[1]], STRING) or isinstance(self.namespace.vars[i[1]], CHAR):
+                        return string
+                        #TODO func with string
                 else:
                     example = self.namespace.vars[j.group().replace(' ', '')]
                     try:
@@ -197,7 +212,7 @@ class Parser:
             return str(eval(st))
         except:
             #TODO exception unrecognised expression
-            pass
+            str(st)
 
     def parse_equal(self, i):
         res = i.split(':=')[1]
@@ -226,7 +241,8 @@ class Parser:
         a = get_quoters_under_func(a)
 
         for j in range(len(a)):
-            res += str(self.solving(a[j]))
+            print(a[j].replace(' ', ''))
+            res += str(self.solving(a[j].replace(' ', '')))
         self.hero.console.write(res)
 
     def  parsing_comands(self, string):
@@ -273,26 +289,33 @@ class Parser:
         def wrapper(self, string: str, l: List[str] = []):
             a = re.sub(' ', '', string)
             a = get_quoters_under_func(a)
-            func(self, string, l=a)
+            for i in a:
+                try:
+                    name, res = i.split(':=')
+                    res = self.solving(res)
+                except:
+                    name, res, = i, ''
+                func(self, name, res)
         return wrapper
 
     @get_var
-    def get_int_var(self, string: str, l: List[str] = []):
-        for i in l:
-            try:
-                name, res = i.split(':=')
-                res = self.solving(res)
-            except:
-                name, res, = i, ''
-            self.namespace.get_int_var(name, res)
+    def get_int_var(self, name, res):
+        self.namespace.get_int_var(name, res)
     @get_var
-    def get_bool_var(self, string: str, l: List[str] = []):
-        for i in l:
-            try:
-                name, res = i.split(':=')
-            except:
-                name, res = i, ''
-            self.namespace.get_bool_var(name, res)
+    def get_bool_var(self, name, res):
+        self.namespace.get_bool_var(name, res)
+
+    @get_var
+    def get_float_var(self, name, res):
+        self.namespace.get_float_var(name, res)
+
+    @get_var
+    def get_string_var(self, name, res):
+        self.namespace.get_string_var(name, res)
+
+    @get_var
+    def get_char_var(self, name, res):
+        self.namespace.get_char_var(name, res)
 
     def get_spaces(self, string: str):
         return len(re.split('\S', string)[0])
