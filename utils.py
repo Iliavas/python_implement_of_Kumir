@@ -28,7 +28,6 @@ def get_quoters_under_func(string: str)->List[str]:
     l = {}
     for i in it:
         l.update({i.start(): i.group()})
-        print(i.start(), i.end())
         string = split_string(string, i.start(), '', i.end())
     a = string.replace(',', '{')
     for i in l.keys():

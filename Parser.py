@@ -69,7 +69,6 @@ class Parser:
                     self.parsing_input(i.split('ввод')[-1])
                     break
                 elif re.sub('\(.*\)', '', j) in list(namespace.vars.keys()):
-                    print(i.split(), j, i[word_counter:], word_counter)
                     self.solving(' '.join(i.split()[word_counter:]))
                 else:
                     self.parsing_comands(i)
@@ -84,8 +83,8 @@ class Parser:
                     if i != 'знач':
                         to_ret.update({args[i][2]: self.namespace.vars[i]})
                     else:
-                        print(self.namespace.vars[i], 'знач')
-                        return self.namespace.vars[i]
+                        print('self.namespace', self.namespace.vars, self.namespace.vars['знач'])
+                        return self.namespace.vars['знач']
             return to_ret
 
     def solving(self, string):
@@ -100,6 +99,7 @@ class Parser:
                 it = re.finditer('[^A-z](' + i[1] + ')[^A-z]|^'+i[1]+'|$'+i[1], string)
             except: continue
             for j in it:
+                print(i[1])
                 if not isinstance(self.namespace.vars[i[1]], FUNCTION):
                     string = split_string(string, j.start() + 1, str(self.namespace.vars[j.group().replace(' ', '').replace('(', '').replace(')', '')]), j.end() - 1)
                 else:
@@ -112,7 +112,7 @@ class Parser:
                     for i in enumerate(example.args.keys()):
                         try:
                             example.args[i[1]].append(args[i[0]])
-                        except: print('sosi')
+                        except: pass
                         #TODO exception low amount of arg's
                     example.reinit()
                     ret = self.parse(str(example), example.namespace, is_function=True, args=example.args)
@@ -181,16 +181,14 @@ class Parser:
             pass
 
     def parse_equal(self, i):
-        #res = self.parse(i.split(':=')[1], self.namespace)
+        res = i.split(':=')[1]
         for j in i.split(':=')[1].split(' '):
-            print(j)
             if j in CHARCH or j in list(self.namespace.vars.keys()):
                 res = self.solving(i.split(':=')[1])
                 break
-        try:
-            self.namespace.vars[i.split(':=')[0].replace(' ', '')] = res
-        except: print('sosat')
-        print(self.namespace.vars)
+        #try:
+        self.namespace.vars[i.split(':=')[0].replace(' ', '')] = res
+        #except: print('sosat')
 
     def printing(self, string):
         res = ''
@@ -265,7 +263,6 @@ class Parser:
             try:
                 name, res = i.split(':=')
                 res = self.solving(res)
-                print(res)
             except:
                 name, res, = i, ''
             self.namespace.get_int_var(name, res)
@@ -323,7 +320,6 @@ class Parser:
         name = s.replace('алг', '', 1)
         t = None
         if len(name.split()) > 1:
-            print(name.split())
             #TODO fix tipization
             t = name.split()[0]
             name = name.split()[-1]
@@ -337,7 +333,6 @@ class Parser:
             if 'кон' in i[1] and self.get_spaces(i[1]) == 0:
                 end = i[0]
                 break
-        print(is_function)
         self.namespace.get_func(name.replace(' ', ''), program[2:end], is_func=is_function, args=args, type=t)
         del program[:end]
         return program

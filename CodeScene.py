@@ -3,7 +3,7 @@ from tkinter import scrolledtext
 import tkinter as tk
 from tkinter import *
 from utils import start_th
-
+#from debug import TEMP
 TEMPLATE = "алг  \nнач \n  \nкон"
 
 class CodeScene:
@@ -28,3 +28,4 @@ class CodeScene:
         self.hero.pos = self.hero.first_pos
         self.s = self.txt.get("1.0", END)
         self.hero.Parser.parse(self.s, self.hero.vars)
+        #self.hero.Parser.parse('\n'.join(TEMP), self.hero.vars)
